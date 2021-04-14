@@ -1,7 +1,7 @@
+!/bin
 
 
-
-## Task 1: Configure WordPress on Amazon EC2 
+# Task 1: Configure WordPress on Amazon EC2 
 
 An Amazon EC2 instance containing WordPress has been automatically provisioned as part of this lab. 
 
@@ -214,6 +214,20 @@ Task 5: Using scripts to upload changes to Amazon S3
 Now that you have created a static version of your website and have uploaded changes, you may want to simplify this operation in the future. In this task, you create a script to update the static files with any changes from WordPress and upload the changes Amazon S3 to replace running each command manually. 
 
 Enter the following commands to create a new shell script that extracts the pages from WordPress and copies them to your Amazon S3 bucket: 
+
+```shell
+# Determine Region
+AZ=`curl --silent http://169.254.169.254/latest/meta-data/placement/availability-zone/`
+REGION=${AZ::-1}
+
+# Retrieve Amazon S3 bucket name starting with wordpress-*
+BUCKET=`aws s3api list-buckets --query "Buckets[?starts_with(Name, 'wordpress-')].Name | [0]" --output text`
+```
+
+
+```shell
+aws s3 sync --acl public-read /var/www/html/wordpress/wordpress-static s3://$BUCKET
+
 
 echo "cd /var/www/html/wordpress; sudo rm -rf wordpress-static; sudo /bin/sh wpstatic.sh -a; aws s3 sync --acl public-read --delete /var/www/html/wordpress/wordpress-static s3://$BUCKET" > $HOME/wordpress-to-s3.sh; 
  
